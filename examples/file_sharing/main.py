@@ -86,7 +86,6 @@ def load_server_addrs() -> list[str]:
 
 
 async def main(
-    addr: str,
     port: int,
     mode: Literal["server", "clinet"],
     key: str,
@@ -95,10 +94,10 @@ async def main(
 ):
     """Main loop that runs client/server function."""
     try:
+        addr = "0.0.0.0"
         if port <= 0:
             port = random.randint(10000, 60000)
         assert VALIDATE_PORT_RANGE(port)
-
         dht_mode = None
         if mode is None or mode.lower() == "client":
             dht_mode = DHTMode.CLIENT
@@ -151,7 +150,6 @@ async def main(
                 logger.info(f"DHT service started in {dht_mode.value} mode")
                 value_key = create_key_from_binary(str(path).encode())
 
-                # TODO: change to seceret key
                 content = key.encode()
                 content_key = create_key_from_binary(content)
 
@@ -287,10 +285,7 @@ Example usage (client):
         required=True,
     )
     parser.add_argument(
-        "-k",
-        "--key",
-        type=str,
-        help="Content key of providers.",
+        "-k", "--key", type=str, help="Content key of providers.", required=True
     )
 
     # add option to use verbose logging
@@ -310,7 +305,7 @@ Example usage (client):
     try:
         trio.run(
             main,
-            *(args.address, args.port, args.mode, args.key, args.file, args.bootstrap),
+            *(args.port, args.mode, args.key, args.file, args.bootstrap),
         )
     except KeyboardInterrupt:
         pass
